@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@mailchimp/mailchimp_transactional": "^1.0.50",
     "axios": "^1.5.0",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
@@ -8,10 +9,14 @@
     "express": "^4.18.2",
     "express-validator": "^7.0.1",
     "handlebars": "^4.7.8",
+    "joi": "^17.10.2",
     "jsonwebtoken": "^9.0.2",
+    "mandrill": "^0.1.0",
+    "mandrill-api": "^1.0.45",
     "mongoose": "^7.5.0",
     "nodemailer": "^6.9.5",
-    "nodemailer-express-handlebars": "^6.1.0"
+    "nodemailer-express-handlebars": "^6.1.0",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

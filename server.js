@@ -3,16 +3,10 @@ require('dotenv').config(); // Load environment variables
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const bcrypt = require('bcrypt');
-const crypto = require('crypto'); // For generating verification code
 const cors = require('cors');
-const nodemailer = require('nodemailer');
-const { generateJwtToken } = require('./auth'); // Adjust the path as needed
-
-
 const app = express();
 const port = process.env.PORT || 5002;
-
+  
 app.use(express.json());
 
 app.use(bodyParser.json());
@@ -30,184 +24,104 @@ db.once('open', () => {
   console.log('Connected to MongoDB');
 });
 
+//** Log Generate API Start **//
+const userLogRouter = require('./routes/userLog');
+app.use('/api/user-log', userLogRouter);
+//** Log Generate API End **//
 
-
-/* Registration Send API Start */
-const User = require('./model/user'); // Import your User model from user.js
 
 // Your API endpoint for user registration (as provided earlier)
-app.post('/api/register', async (req, res) => {
-  try {
-    const { name, email, phone, dob, gender, password } = req.body;
-
-    // Check if any required fields are missing
-    if (!name || !email || !phone || !dob || !gender || !password) {
-      return res.status(400).json({ error: 'All fields are required' });
-    }
-
-    const saltRounds = 10; // Number of salt rounds for hashing
-
-    // Hash the password with the specified number of salt rounds
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-    // Generate a unique verification code (you can customize this as needed)
-    const verificationCode = crypto.randomBytes(4).toString('hex');
-
-    // Check if the email is already registered and verified
-    let existingVerifiedEmail = await User.findOne({ email, emailVerified: true });
-    if (existingVerifiedEmail) {
-      return res.status(400).json({ error: 'Email already exists' });
-    }
-
-    // Check if the phone number is already registered and verified
-    let existingVerifiedPhone = await User.findOne({ phone, mobileVerified: true });
-    if (existingVerifiedPhone) {
-      return res.status(400).json({ error: 'Mobile number already exists' });
-    }
-
-    // Check if the email is already registered and not verified
-    let existingUnverifiedEmail = await User.findOne({ email, emailVerified: false });
-    if (existingUnverifiedEmail) {
-      // Update the existing unverified user's information
-      existingUnverifiedEmail.name = name;
-      existingUnverifiedEmail.dob = dob;
-      existingUnverifiedEmail.gender = gender;
-      existingUnverifiedEmail.password = hashedPassword;
-
-      // Check if the same phone number also exists in unverified email
-      const existingUnverifiedPhone = await User.findOne({ phone: existingUnverifiedEmail.phone });
-      if (existingUnverifiedPhone) {
-        existingUnverifiedPhone.name = name;
-        existingUnverifiedPhone.dob = dob;
-        existingUnverifiedPhone.gender = gender;
-        existingUnverifiedPhone.password = hashedPassword;
-        await existingUnverifiedPhone.save();
-      }
-      
-      await existingUnverifiedEmail.save();
-      return res.status(200).json({ success: true, message: 'Registration successful'});
-    }
-
-    // Check if the phone number is already registered and not verified
-    let existingUnverifiedPhone = await User.findOne({ phone, mobileVerified: false });
-    if (existingUnverifiedPhone) {
-      // Update the existing unverified user's information
-      existingUnverifiedPhone.name = name;
-      existingUnverifiedPhone.dob = dob;
-      existingUnverifiedPhone.gender = gender;
-      existingUnverifiedPhone.password = hashedPassword;
-
-      // Check if the same email also exists in unverified phone
-      const existingUnverifiedEmail = await User.findOne({ email: existingUnverifiedPhone.email });
-      if (existingUnverifiedEmail) {
-        existingUnverifiedEmail.name = name;
-        existingUnverifiedEmail.dob = dob;
-        existingUnverifiedEmail.gender = gender;
-        existingUnverifiedEmail.password = hashedPassword;
-        await existingUnverifiedEmail.save();
-      }
-
-      await existingUnverifiedPhone.save();
-      return res.status(200).json({ success: true, message: 'Registration successful' });
-    }
-
-    // Create a new user with the provided data and verification code
-    const newUser = new User({
-      name,
-      email,
-      phone,
-      dob,
-      gender,
-      password: hashedPassword,
-      verificationCode,
-    });
-
-    // Save the user to the database
-    await newUser.save();
-
-    res.status(201).json({ success: true, message: 'Registration successful' });
-  } catch (error) {
-    console.error(error);
-
-    // Handle specific error cases
-    if (error.message.includes('validation failed')) {
-      return res.status(400).json({ error: 'Invalid input data', details: error.message });
-    }
-
-    res.status(500).json({ error: 'Registration failed', details: error.message });
-  }
-});
+const registrationRouter = require('./routes/registration');
+app.use('/api/register', registrationRouter);
 /* Registration Send API End */
 
+//** Lifestyle Add API Start **/
+const lifeStyleUpdate = require('./routes/lifestyleRoutes');
+app.use('/api/user-lifestyle', lifeStyleUpdate);
+//** Lifestyle Add API End **/
 
-/* Email Send API Start */
-const transporter = nodemailer.createTransport({
-  service: 'Gmail',
-  auth: {
-    user: 'rohisrma@gmail.com',
-    pass: 'Brandshow@123',
-  },
-});
+//** Religious BG Add API Start **/
+const religiousBackgroundRoutes = require('./routes/religiousBackgroundRoutes');
+app.use('/api/user-religious-bg', religiousBackgroundRoutes);
+//** Religious BG Add API End **/
 
-// API endpoint for sending emails
-app.post('/api/send-email', (req, res) => {
-  const { to, subject, text } = req.body;
 
-  const mailOptions = {
-    from: 'rohisrma@gmail.com',
-    to: to,
-    subject: subject,
-    text: text,
-  };
+// ** Family Info Add API Start ** //
+const familyRoutes = require('./routes/familyRoutes');
+app.use('/api/user-family-info', familyRoutes);
+// ** Family Info Add API End ** //
 
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error(error);
-      res.status(500).json({ success: false, error: error.message });
-    } else {
-      console.log('Email sent: ' + info.response);
-      res.json({ success: true, message: 'Email sent successfully!' });
-    }
-  });
-});
-/* Email Send API End */
+//** Career and Educational Info Add API Start **//
+const eduCareerRoute = require('./routes/educationCareerRoutes.js');
+app.use('/api/user-education-career-info', eduCareerRoute);
+//** Career and Educational Info Add API End **//
 
+
+ //** Basic Info Add API Start **//
+ const basicInfoRoutes = require('./routes/basicInfoRoutes');
+ app.use('/api/user-basic-info', basicInfoRoutes);
+ //** Basic Info Add API ENd **//
+
+
+//** API to add about yourself start **//
+const aboutYourselfRoutes = require('./routes/aboutYourselfRoutes');
+app.use('/api/user-about-yourself', aboutYourselfRoutes);
+//** API to add about yourself end **//
+
+
+/****** Mobile OTP Send API Start *********/
+const SendMobOTP = require('./routes/sendMobOTPRoutes');
+app.use('/api/send-mob-otp', SendMobOTP);
+/****** Mobile OTP Send API End *********/
+
+
+// ** Mobile OTP Verification Start ** //
+const verifyOTP = require('./routes/verifyOTPRoutes');
+app.use('/api/verify-mob-otp', verifyOTP);
+// ** Mobile OTP Verification End ** //
+
+/****** Email Send API Start *********/
+const emailOTP = require('./routes/sendEmailOTPRoutes');
+app.use('/api/send-email-otp', emailOTP);
+/****** Email Send API End *********/
+
+
+// ** Email OTP Verification Start ** //
+const verifyMailOTP = require('./routes/verifyMailOTPRoutes');
+app.use('/api/verify-mail-otp', verifyMailOTP);
+// ** Email OTP Verification End ** //
+
+const loginRouter = require('./routes/loginAuthRoutes');
+app.use('/api/login/returnLogin', loginRouter);
+
+//** Login Via Mobile API Start **//
+const logViaMob = require('./routes/loginViaMobRoutes');
+app.use('/api/login-via-mob', logViaMob);
+/* Login API ENd */
 
 /* Login API Start */
-app.post('/api/login', async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    // Find the user by email
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
-
-    // Check if the user's account is active and email is verified
-    if (user.status !== 'active' || !user.emailVerified) {
-      return res.status(403).json({ message: 'Account is not active or email is not verified' });
-    }
-
-    // Check if the provided password matches the hashed password
-    if (bcrypt.compareSync(password, user.password)) {
-      // You can generate a JWT token here and send it as part of the response
-      // This token can be used to authenticate the user for future requests
-      // Example of generating a JWT token:
-      const token = generateJwtToken(user);
-
-      return res.json({ status: 'true', message: 'Login successful', token });
-    } else {
-      return res.status(401).json({ status: 'false', message: 'Invalid email or password' });
-    }
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ status: 'false', message: 'Server error' });
-  }
-});
-
+const loginRoutes = require('./routes/loginAuthRoutes');
+app.use('/api/login', loginRoutes);
 /* Login API ENd */
+
+// ** Update User Status to Active and Return Session Start ** //
+const statusUpdateRoutes = require('./routes/statusUpdateRoutes');
+app.use('/api/status-update', statusUpdateRoutes);
+// ** Update User Status to Active and Return Session End ** //
+
+
+// API to Add Basic Preferences Start
+const preferences = require('./routes/preferenceRoutes'); // Import the combined route for both basic and community preferences
+app.use('/api/preferences', preferences); // Use a single route for both types
+// API to Add Basic Preferences ENd
+
+// API to Return User Data
+const userData = require('./routes/userDataRoutes'); // Import the combined route for both basic and community preferences
+app.use('/api/user-data', userData); // Use a single route for both types
+// API to Return User Data ENd
+
+const recommendedData = require('./routes/recommendedProfile'); 
+app.use('/api/recommendedData', recommendedData);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

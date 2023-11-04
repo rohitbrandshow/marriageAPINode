@@ -11,7 +11,10 @@ const userSchema = new mongoose.Schema({
       unique: true, // Make phone field unique
     },
     dob: Date,
-    gender: String,
+    gender: {
+      type: String,
+      enum: ['Male', 'Female'], // Use enum to specify allowed values
+    },
     password: String,
     status: {
       type: String,
@@ -26,8 +29,25 @@ const userSchema = new mongoose.Schema({
       type: Boolean,
       default: false,
     },
+    userType: {
+      type: String,
+      default: 'User',
+    },
+    createdFrom: {
+      type: String,
+      enum: ['adminUpload', 'webRegistrationForm'],
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
+    updatedOn: Date,
   });
   
+  userSchema.pre('save', function (next) {
+    this.updatedOn = new Date();
+    next();
+  });
 
 const User = mongoose.model('User', userSchema);
 
