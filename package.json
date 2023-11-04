@@ -1,7 +1,19 @@
 {
+  "name": "Marriage Portal",
+  "version": "1.0.0",
+  "description": "Marriage Portal API App",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+	"build": "npm"
+  },
+  "keywords": [],
+  "author": "BrandShow Consultancy Services Limited",
+  "license": "MIT",
   "dependencies": {
     "@mailchimp/mailchimp_transactional": "^1.0.50",
-    "axios": "^1.5.0",
+    "axios": "^0.24.0",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
@@ -11,7 +23,6 @@
     "handlebars": "^4.7.8",
     "joi": "^17.10.2",
     "jsonwebtoken": "^9.0.2",
-    "mandrill": "^0.1.0",
     "mandrill-api": "^1.0.45",
     "mongoose": "^7.5.0",
     "nodemailer": "^6.9.5",
@@ -20,8 +31,5 @@
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
-  },
-  "scripts": {
-    "start": "nodemon server.js"
   }
 }
