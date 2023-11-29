@@ -30,12 +30,5 @@
     "start": "node server.js",
     "build": "node install",
     "dev": "node start"
-  },
-  "name": "back_end",
-  "version": "1.0.0",
-  "main": "config.js",
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": ""
+  }
 }
