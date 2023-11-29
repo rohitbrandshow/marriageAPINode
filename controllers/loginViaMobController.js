@@ -26,13 +26,13 @@ const loginViaMobile = async (req, res) => {
       // Example of generating a JWT token:
       const token = generateJwtToken(user);
 
-      return res.json({ status: 'true', message: 'Login successful', token });
+      return res.json({ success: true, status: 'true', message: 'Login successful', token, user: { id: user.id, name: user.name, email: user.email, phone: user.phone, password: user.password, userType: user.userType  } });
     } else {
-      return res.status(401).json({ status: 'false', message: 'Wrong OTP' });
+      return res.status(401).json({ success: false, status: 'false', message: 'Wrong OTP' });
     }
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ status: 'false', message: 'Server error' });
+    return res.status(500).json({ success: false, status: 'false', message: 'Server error' });
   }
 };
 
