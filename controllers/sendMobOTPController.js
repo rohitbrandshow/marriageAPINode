@@ -1,5 +1,5 @@
 const fetch = require('node-fetch');
-
+const User = require('../model/user'); // Import your User model
 const { msg91ApiKey, msg91TemplateId } = require('../config'); // Import your API key and template ID
 
 // Controller for sending mobile OTP
@@ -11,6 +11,12 @@ const createOrUpdateSendMobOTP = async (req, res) => {
     // Validate the mobile number (you can add more robust validation)
     if (!mobile || !/^[0-9]{10}$/.test(mobile)) {
       return res.status(400).json({ status: 'failed', message: 'Invalid mobile number' });
+    }
+
+    const user = await User.findOne({phone: mobile});
+
+    if (!user) {
+      return res.status(500).json({ status: 'failed', message: 'Mobile Number not registered with Us' });
     }
 
     const mobileWithCode = `91${mobile}`;

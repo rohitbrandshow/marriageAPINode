@@ -261,7 +261,47 @@ const userAddFromAdmin  = async (req, res) => {
 };
 
 
+const forgetPassword = async (req, res) => {
+  const { email, otp, newPassword } = req.body;
+
+  try {
+    // Check if any required fields are missing
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    // Find the user by email
+    const user = await User.findOne({ email, verificationCode:otp});
+
+    // Check if the user exists
+    if (!user) {
+      return res.status(404).json({ error: 'Wrong verification code' });
+    }
+
+    // Hash the new password
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update the user's password
+    user.password = hashedNewPassword;
+    user.emailVerified = true;
+    await user.save();
+
+    res.status(200).json({ success: true, message: 'Password changed successfully' });
+  } catch (error) {
+    console.error(error);
+
+    // Handle specific error cases
+    if (error.message.includes('validation failed')) {
+      return res.status(400).json({ error: 'Invalid input data', details: error.message });
+    }
+
+    res.status(500).json({ error: 'Password change failed', details: error.message });
+  }
+};
+
+
 module.exports = {
   userRegistration,
-  userAddFromAdmin
+  userAddFromAdmin,
+  forgetPassword
 };

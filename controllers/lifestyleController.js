@@ -78,6 +78,7 @@ const createOrUpdateLifestyleInfo = async (req, res) => {
     return res.status(500).json({ status: 'false', message: error.message });
   }
 };
+
 const createOrUpdateLifestyleInfoFromAdmin = async (req, res) => {
   const { diet, phone,userUploadingBy } = req.body;
   let userLogData = null;

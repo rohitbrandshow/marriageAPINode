@@ -8,15 +8,15 @@ const loginViaMobile = async (req, res) => {
   const phone = mobile;
   try {
     // Find the user by mobile
-    const user = await User.findOne({ phone });
+    const user = await User.findOne({phone});
 
     if (!user) {
-      return res.status(401).json({ status: 'false', message: 'Oops user not found, Register yourself' });
+      return res.status(401).json({ success: false, status: 'false', message: 'Oops user not found, Register yourself'});
     }
 
     // Check if the user's account is active and mobile is verified
-    if (user.status !== 'active' || !user.mobileVerified || !user.emailVerified) {
-      return res.status(403).json({ status: 'false', message: 'Account is not active or mobile is not verified' });
+    if (user.status !== 'active' || user.mobileVerified !== true) {
+      return res.status(403).json({ success: false, status: 'false', message: 'Account is not active or mobile is not verified'});
     }
 
     // Verify Mobile and OTP

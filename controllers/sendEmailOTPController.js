@@ -10,10 +10,10 @@ const sendEmailOTP = async (req, res) => {
     } = req.body;
 
     // Find the user by email
-    const user = await User.findOne({ email: recipientEmail });
+    const user = await User.findOne({email: recipientEmail});
 
     if (!user) {
-      return res.status(400).json({ status: 'failed', message: 'Email not found in the database.' });
+      return res.status(400).json({ status: 'failed', message: 'Email is not registered with us'});
     }
 
     // If a user with the email is found, retrieve the verification code
@@ -41,7 +41,7 @@ const sendEmailOTP = async (req, res) => {
       to: [
         {
           email: recipientEmail,
-          name: recipientName,
+          name: user.name,
           type: 'to',
         },
       ],
